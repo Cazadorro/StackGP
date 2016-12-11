@@ -1,0 +1,15 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# c++ compiled files.
+*.o
+
+# Emacs temporary files
+*~
+
+# Vim (Master Race) temp files
+.*.swp
+
+# Goodby HelloEC
+HelloEC
