@@ -1,5 +1,6 @@
 #!/bin/bash
 import random
+from gpmember import StackGPMember
 
 
 def recombine(gp_stack_l, gp_stack_r):
@@ -16,5 +17,4 @@ def recombine(gp_stack_l, gp_stack_r):
     new_len = len(min_gp_stack) + random.randint(0, gp_len_diff)
     for i in range(len(min_gp_stack), new_len):
         gp_operators.append(max_gp_stack[i])
-
-    return tuple(gp_operators)
+    return StackGPMember(gp_operators)

@@ -1,5 +1,3 @@
-
-
 """
 Genetic Programing Operators Module
 
@@ -8,7 +6,6 @@ Contains functionality and structures pertaining to operators allowed within the
 """
 
 import random
-
 
 
 class EncapsulatedData:
@@ -55,6 +52,9 @@ class TerminalSetOperator:
         """
         var_stack.append(self.encapsulated.data)
 
+    def clone(self):
+        return self
+
 
 class FunctionalSetOperator:
     """
@@ -83,6 +83,9 @@ class FunctionalSetOperator:
             arguments = [var_stack.pop() for _ in range(self.num_args)]
             var_stack.append(self.function(*arguments))
 
+    def clone(self):
+        return self
+
 
 class ERConstantSetOperator:
     """
@@ -107,6 +110,9 @@ class ERConstantSetOperator:
         if self.data is None:
             self.data = random.uniform(self.min_range, self.max_range)
         var_stack.append(self.data)
+
+    def clone(self):
+        return ERConstantSetOperator()
 
     @classmethod
     def set_range(cls, min_range, max_range):

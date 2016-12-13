@@ -3,21 +3,26 @@ from gpmember import StackGPMember
 import random
 
 
-def mutate(gp_stack):
+def mutate(gp_stack, operator_tuple):
     """
     mutates given stochastic chance
     :param gp_stack:
     :return:
     """
+    mutation_chance = 1.0
     gp_operators = []
-    operator_tuple = StackGPMember.functional_tuple + StackGPMember.terminal_tuple
     for operator in gp_stack:
-        r = random.randint(0, 2)
-        if r == 0:
-            pass
-        elif r == 1:
+        if random.random() < mutation_chance:
+            r = random.randint(0, 2)
+            if r == 0:
+                pass
+            elif r == 1:
+                gp_operators.append(random.choice(operator_tuple).clone())
+            elif r == 2:
+                gp_operators.append(random.choice(operator_tuple).clone())
+                gp_operators.append(operator)
+        else:
             gp_operators.append(operator)
-        elif r == 2:
-            gp_operators.append(operator)
-            gp_operators.append(random.choice(operator_tuple))
-    return tuple(gp_operators)
+    if random.random() < mutation_chance:
+        gp_operators.append(random.choice(operator_tuple).clone())
+    return StackGPMember(tuple(gp_operators))

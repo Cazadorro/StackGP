@@ -9,6 +9,8 @@ from gpselection import n_elitist, stochastic_parent_selection
 from gpmutation import mutate
 from gprecombination import recombine
 from gpmember import StackGPMember
+from gppopulation import StackGPPopulation
+from gpinitialization import uniform_initialization
 
 
 def function_evaluate(gp_stack, expected_list):
@@ -29,15 +31,28 @@ def function_evaluate(gp_stack, expected_list):
             yhat.append(None)
     fitness = 0
     prev_diff = 1
+    inc_diff = 0
+    num_correct = 0
+    num_incorrect = -1
     for i in range(num_out):
         if yhat[i] is not None:
             absdiff = abs((yhat[i] - expected_list[i]))
             fitness -= absdiff
             if absdiff == 0:
                 prev_diff *= (prev_diff + 1)
+                num_correct += 1
+            else:
+                if inc_diff == 0:
+                    inc_diff = 1
+                else:
+                    inc_diff *= (inc_diff + 1)
         else:
-            fitness -= abs(expected_list[i]) ** 10
-    fitness += prev_diff
+            fitness -= abs(expected_list[i]) ** 3
+    num_incorrect = len(yhat) - num_correct
+    # fitness += prev_diff
+    fitness -= inc_diff
+    if num_incorrect == 0:
+        fitness += 10
     gp_stack.update_fitness(fitness)
     return yhat
 
@@ -56,7 +71,7 @@ def protected_div(a, b):
 
 
 def main():
-    target_function = lambda x: x ** 4
+    target_function = lambda x: 0.5 * (x ** 2)
 
     add = FunctionalSetOperator(operator.add, 2, name="add")
     sub = FunctionalSetOperator(operator.sub, 2, name="sub")
@@ -67,38 +82,41 @@ def main():
     terminal_x = TerminalSetOperator(X, name="x")
     terminal_operators = (terminal_x,)
     ERConstantSetOperator.set_range(-10, 10)
-    StackGPMember.set_class_vars(functional_operators, terminal_operators, 0.5)
+    StackGPMember.set_class_vars(0.1, 10)
+    operator_tuple = functional_operators + terminal_operators + (ERConstantSetOperator(),)
+    operator_tuple = functional_operators + terminal_operators
 
-    _mu = 400
-    _lambda = 300
-    left_over = _mu - _lambda
-    max_gp_size = 10
-    uneval_stack_list = [StackGPMember(max_gp_size, "uniform random", erk_enabled=False) for _ in range(_mu)]
-    eval_stack_list = []
-    max_evals = 200
+    gp_mu = 50
+    gp_lambda = 25
+    max_evals = 100
 
-    x_vals = [-1, -2, -3, 1, 2, 3]
+    x_vals = [0, 1, 2, 4, 8, 16, 32]
     y_vals = [target_function(x) for x in x_vals]
+
+    population = StackGPPopulation(gp_mu, gp_lambda, operator_tuple, uniform_initialization, recombine, mutate,
+                                   stochastic_parent_selection, n_elitist)
+
     for eval_num in range(max_evals):
-        # evaluating
-        for unevaled in uneval_stack_list:
+        unevaluated = population.loan_unevaluated()
+        evaluated = []
+        for member in unevaluated:
             for test_set_i in range(len(x_vals)):
                 X.data = x_vals[test_set_i]
-                function_evaluate(unevaled, [y_vals[test_set_i]])
-            eval_stack_list.append(unevaled)
-        uneval_stack_list = []
-        parents1, parents2 = stochastic_parent_selection(eval_stack_list, _lambda)
-        for i in range(_lambda):
-            uneval_stack_list.append(StackGPMember.from_recomb_mutation(parents1[i], parents2[i], recombine, mutate))
-        if eval_num < max_evals - 1:
-            eval_stack_list = n_elitist(eval_stack_list, left_over)
-        print(eval_num)
-    best_member = max(eval_stack_list, key=attrgetter('fitness'))
+                function_evaluate(member, [y_vals[test_set_i]])
+            evaluated.append(member)
+        population.return_unevaluated(evaluated)
+        population.progress_generation()
+        # for member in population.evaluated:
+        #     member.print_stack()
+        #     print(member.fitness)
+
+    best_member = max(population.evaluated, key=attrgetter('fitness'))
+
     for test_set_i in range(len(x_vals)):
         X.data = x_vals[test_set_i]
         print("stack eval = ", function_evaluate(best_member, [y_vals[test_set_i]]), " y eval = ", [y_vals[test_set_i]])
-
     best_member.print_stack()
+    print(best_member.fitness)
 
 
 if __name__ == "__main__":
