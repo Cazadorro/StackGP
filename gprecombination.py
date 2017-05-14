@@ -18,3 +18,4 @@ def recombine(gp_stack_l, gp_stack_r):
     for i in range(len(min_gp_stack), new_len):
         gp_operators.append(max_gp_stack[i])
     return StackGPMember(gp_operators)
+
