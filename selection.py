@@ -6,77 +6,10 @@ from combinedsampling import n_choice_sampler, replacement_sampler, \
     no_replacement_sampler
 
 
-def selection_decorator(func):
-    @wraps(func)
-    def selection_with_assertion(*args, **kwargs):
-        selection_assertion(*args, **kwargs)
-        return func(*args, **kwargs)
-
-    return selection_with_assertion
-
-
 def selection_assertion(individual_list, n, with_replacement):
     assert n <= len(individual_list) or with_replacement, \
         "Error, can't return more individuals than the " \
         "population with out replacement"
-
-
-# TODO should probably change these all to functors
-# TODO, need with/without replacement, and ability to select for worst or best
-def n_elitist(individual_list, n, *, get_worst, with_replacement):
-    selection_assertion(n, individual_list, with_replacement)
-    selected = []
-    individual_list.sort(reverse=get_worst)
-    selections_left = n
-    while selections_left:
-        n_selected = selections_left % len(individual_list)
-        selected.extend(individual_list[:n_selected])
-        selections_left -= n_selected
-    return selected
-
-
-def fitness_proportional(individual_list, n, *, get_worst, replacement):
-    selection_assertion(n, individual_list, replacement)
-    normalized_fitness = [individual.fitness for individual in individual_list]
-    fitness_sum = sum(normalized_fitness)
-    if get_worst:
-        normalized_fitness = [1 - (fitness / fitness_sum) for fitness in
-                              normalized_fitness]
-    else:
-        normalized_fitness = [(fitness / fitness_sum) for fitness in
-                              normalized_fitness]
-    return n_choice_sampler(individual_list, normalized_fitness, n,
-                            replacement=replacement)
-
-
-def stochastic_selection(individual_list, n, *, get_worst, replacement):
-    selection_assertion(n, individual_list, replacement)
-    if replacement:
-        return random.choices(individual_list, k=n)
-    return random.sample(individual_list, n)
-
-
-def k_tournament_selection(individual_list, n, k, *, get_worst, replacement):
-    selection_assertion(n, individual_list, replacement)
-
-    fitness_selector = min if get_worst else max
-    selected = []
-    if replacement:
-        for tournament_round in range(n):
-            contestants = [individual_list[random.randrange(n)] for _ in
-                           range(k)]
-            selected.append(
-                fitness_selector(contestants, key=lambda x: x.fitness))
-
-    else:
-        index_dictionary = {i: individual for i, individual in
-                            enumerate(individual_list)}
-        for tournament_round in range(n):
-            contestant_keys = random.choice(list(index_dictionary.keys()), k=k)
-            selected_key = fitness_selector(contestant_keys,
-                                            key=lambda x: index_dictionary[
-                                                x].fitness)
-            selected.append(index_dictionary.pop(selected_key))
 
 
 class Selector:
