@@ -2,7 +2,7 @@
 
 
 class PopulationSize:
-    def __init__(self, _mu, _lambda):
+    def __init__(self, _mu: int, _lambda: int):
         self._mu = _mu
         self._lambda = _lambda
 
@@ -47,7 +47,7 @@ class SelectionFunctions:
         return self._survival_selector(population)
 
 
-class PopulationMemberParam:
+class MemberProperties:
     def __init__(self, gene_class, evaluator, gene_individual_wrapper):
         self._gene_class = gene_class
         self._evaluator = evaluator
@@ -66,14 +66,14 @@ class Population:
     def __init__(self, population_size: PopulationSize,
                  gene_functions: GeneFunctions,
                  selection_functions: SelectionFunctions,
-                 population_member: PopulationMemberParam):
+                 member_properties: MemberProperties):
         self._popsize = population_size
         self._mutator = gene_functions
         self._selector = selection_functions
-        self._memberparams = population_member
+        self._memberprops = member_properties
         self._evaluated = []
         self._unevaluated = self._mutator.initialize(
-            self._memberparams.gene_wrapper)
+            self._memberprops.gene_wrapper)
         self._recombined = []
         self._mutated = []
         self._parents = []
@@ -82,7 +82,7 @@ class Population:
         self._generations = 0
 
     def evaluate(self, n):
-        self._evaluated = [self._memberparams.evaluate(self._evaluated.pop())
+        self._evaluated = [self._memberprops.evaluate(self._evaluated.pop())
                            for _ in range(n)]
         self._evaluations += n
 
@@ -113,4 +113,4 @@ class Population:
 
     def _can_progress(self):
         return (self._evaluations - self._popsize.maxsize) >= (
-        self._generations * self._popsize.maxsize)
+            self._generations * self._popsize.maxsize)
