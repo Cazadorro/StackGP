@@ -3,6 +3,8 @@
 import random
 import math
 import numpy as np
+from aliassampling import AliasSampler
+from genetics import StackMultiGene
 
 
 def binary_search(search_list, value, min_index=0, max_index=None):
@@ -25,7 +27,8 @@ def _binary_search(search_list, value, min_index, max_index):
 
 def normalize_probabilities(probabilities):
     total_sum = sum(probabilities)
-    return [probability/total_sum for probability in probabilities]
+    return [probability / total_sum for probability in probabilities]
+
 
 class CumulativeProbabilities:
     def __init__(self, probability_list):
@@ -46,13 +49,41 @@ def weighted_gene_choice(genes: list, probabilities: list):
         yield genes[cumulative_prob[r]]
 
 
-def uniform_gene_choice(genes: list):
-    while True:
-        yield random.choice(genes)
-
-
 def weighted_mutator_choice(mutators: list, probabilities: list):
     cumulative_prob = CumulativeProbabilities(probabilities)
     while True:
         r = random.random()
         yield mutators[cumulative_prob[r]]
+
+
+def uniform_elem_generator(elem: list):
+    while True:
+        yield random.choice(elem)
+
+
+def uniform_gene_generator(elem: list):
+    gen = uniform_elem_generator(elem)
+    while True:
+        yield StackMultiGene(next(gen))
+
+
+def uniform_mutation_generator(mutators: list):
+    while True:
+        yield random.choice(mutators)
+
+
+def uniform_gene_generator(gene: list):
+    while True:
+        yield random.choice(gene)
+
+
+def weighted_mutation_generator(mutators: list, probabilities: list):
+    sampler = AliasSampler(mutators, probabilities)
+    while True:
+        yield sampler.choice()
+
+
+def weighted_gene_generator(gene: list, probabilities: list):
+    sampler = AliasSampler(gene, probabilities)
+    while True:
+        yield sampler.choice()

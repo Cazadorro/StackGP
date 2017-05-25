@@ -2,6 +2,7 @@
 
 import inspect
 from structures import DataSource, EncapsulatedData
+from typing import Optional
 
 
 def get_arg_limit(arg_spec):
@@ -19,6 +20,9 @@ class GeneticOperator:
     argument_source = DataSource.NoSource
     result_destination = DataSource.ResultStack
 
+    def __init__(self, name: Optional(str) = "NotNamed"):
+        self._name = name
+
     @staticmethod
     def _get_virtual_machine_structure(vm_structures, structure_key):
         return vm_structures[
@@ -34,11 +38,15 @@ class GeneticOperator:
         return cls._get_virtual_machine_structure(vm_structures,
                                                   cls.result_destination)
 
+    def __str__(self):
+        return self._name
+
 
 class FunctionalSetOperator(GeneticOperator):
     argument_source = DataSource.OperatorStack
 
-    def __init__(self, func):
+    def __init__(self, func, name: Optional(str) = "NotNamed"):
+        super().__init__(name)
         self.num_args = get_number_args(func)
         self.func = func
 
@@ -51,17 +59,22 @@ class FunctionalSetOperator(GeneticOperator):
 
 
 class TerminalSetOperator(GeneticOperator):
-    def __init__(self, data: EncapsulatedData):
+    def __init__(self, data: EncapsulatedData,
+                 name: Optional(str) = "NotNamed"):
+        super().__init__(name)
         self.data = data
 
     def __call__(self, ignore):
         return self.data.value
 
 
+# TODO need to make normal manip operators?  Already did this in xstack?
 class MultiSourceOperator(GeneticOperator):
     result_destination = DataSource.OperatorStack
 
-    def __init__(self, exec_func, arg_source_list):
+    def __init__(self, exec_func, arg_source_list,
+                 name: Optional(str) = "NotNamed"):
+        super().__init__(name)
         self.func = exec_func
         self.arg_source_list = arg_source_list
 

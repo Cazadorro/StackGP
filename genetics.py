@@ -1,24 +1,25 @@
 #!/bin/bash
 
 from structures import Stack
+from typing import List
 
 
-class StackGeneGroup:
+class StackMultiGene:
     def __init__(self, *gene_keys):
-        self._gene_keys = gene_keys
+        self._gene_keys = list(gene_keys)
 
     @property
     def keys(self):
         return self._gene_keys
 
     def get_merge(self, other_gene_group):
-        gene_keys = list(self.keys)
-        gene_keys.extend(other_gene_group.keys)
-        return StackGeneGroup(*gene_keys)
+        gene_keys = self.keys[:]
+        gene_keys.extend(other_gene_group.keys[:])
+        return StackMultiGene(*gene_keys)
 
 
 class StackGenotype:
-    def __init__(self, genes):
+    def __init__(self, genes: List[StackMultiGene]):
         self._genes = genes
 
     @property
@@ -34,11 +35,11 @@ class StackGenotype:
     def clone(self):
         return
 
-    def remove(self, index):
+    def remove(self, index: int):
         return self._genes.pop(index)
 
-    def add(self, gene_group):
-        return self._genes.append(gene_group)
+    def add(self, gene: StackMultiGene):
+        return self._genes.append(gene)
 
     def __len__(self):
         return len(self._genes)
@@ -51,12 +52,14 @@ class StackGenotype:
         return self._genes[index]
 
 
+
+
 class StackPhenotype:
-    def __init__(self, genotype, gene_dictionary):
+    def __init__(self, genotype: StackGenotype, gene_dictionary: list):
         self._genotype = genotype
         self._gene_dictionary = gene_dictionary
 
-    def express(self):
+    def express(self) -> Stack:
         return Stack(
             [self._gene_dictionary[key] for key in self._genotype.keys()])
 

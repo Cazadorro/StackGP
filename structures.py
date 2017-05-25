@@ -16,6 +16,10 @@ class EncapsulatedData:
     def value(self):
         return self._data
 
+    @value.setter
+    def value(self, data):
+        self._data = data
+
 
 @unique
 class DataSource(Enum):
@@ -23,6 +27,7 @@ class DataSource(Enum):
     OperatorStack = auto()
     ResultStack = auto()
     ExecutionStack = auto()
+
 
 class Stack:
     def __init__(self, stack_list=()):
@@ -46,3 +51,6 @@ class Stack:
 
     def pick(self, n):
         return self._stack[-(n + 1)] if n < len(self) else None
+
+
+
