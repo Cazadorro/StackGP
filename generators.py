@@ -71,12 +71,6 @@ def uniform_mutation_generator(mutators: list):
     while True:
         yield random.choice(mutators)
 
-
-def uniform_gene_generator(gene: list):
-    while True:
-        yield random.choice(gene)
-
-
 def weighted_mutation_generator(mutators: list, probabilities: list):
     sampler = AliasSampler(mutators, probabilities)
     while True:

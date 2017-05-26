@@ -13,7 +13,7 @@ def evaluate_operator_stack(operator_stack):
         DataSource.ExecutionStack: Stack(),
     }
     while not operator_stack.empty():
-        operator = operator_stack.pop()
+        operator = operator_stack.pop()[0]
         result_destination = operator.get_destination(vm_structures)
         result = operator(vm_structures)
         result_destination.push(result)
@@ -43,7 +43,8 @@ class TerminalDataSet:
         self._inputs_list = terminal_inputs
         self._results_list = terminal_results
 
-        self._input_result_zip = zip(self._inputs_list, self._results_list)
+        self._input_result_zip = list(
+            zip(self._inputs_list, self._results_list))
 
     @property
     def opmap(self):
@@ -66,24 +67,26 @@ class FitnessEvaluator:
         raise NotImplementedError
 
     def __call__(self, stack_genotype):
-        return self._evaluate()
+        return self._evaluate(stack_genotype)
 
 
 class BasicFitnessEvaluator(FitnessEvaluator):
-        def _evaluate(self, stack_genotype):
-            fitness = 0
-            for expected_vector in self._dataset.terminal_setting_generator():
-                result_stack = evaluate_gene_expression(stack_genotype,
-                                                        self._dataset.opmap)
-                fitness += self._fitness_fuction(result_stack, expected_vector)
-            return fitness
+    def _evaluate(self, stack_genotype):
+        fitness = 0
+        for expected_vector in self._dataset.terminal_setting_generator():
+            result_stack = evaluate_gene_expression(stack_genotype,
+                                                    self._dataset.opmap)
+            fitness += self._fitness_fuction(result_stack, expected_vector)
+        return fitness
 
 
 class CountCorrectFitnessEvaluator(FitnessEvaluator):
     def __init__(self, fitness_function: Callable,
                  terminal_dataset: TerminalDataSet,
-                 diff_tolerance):
+                 count_weight: float,
+                 diff_tolerance: float = 0):
         super().__init__(fitness_function, terminal_dataset)
+        self._count_weight = count_weight
         self._tolerance = diff_tolerance
 
     def _evaluate(self, stack_genotype):
@@ -93,19 +96,28 @@ class CountCorrectFitnessEvaluator(FitnessEvaluator):
             result_stack = evaluate_gene_expression(stack_genotype,
                                                     self._dataset.opmap)
             sub_fitness = self._fitness_fuction(result_stack, expected_vector)
-            if sub_fitness == 0:
+            if abs(sub_fitness) == self._tolerance:
                 correct_count += 1
             fitness += sub_fitness
-        return fitness + 2**correct_count
+        count_score = self._count_weight ** correct_count if correct_count != 0 else 0
+        return fitness + count_score
 
 
-def absolute_error_fitness_function(result_stack: List[Any],
+def absolute_error_fitness_function(result_stack: Stack,
                                     expected_vector: List[Any]):
     fitness = 0
     for expected in expected_vector:
-        calculated = result_stack.pop()
-        if calculated is None:
-            fitness -= 1
+        if result_stack.empty():
+            fitness -= 10
         else:
-            fitness += -abs((expected - calculated) / expected)
+            calculated = result_stack.pop()[0]
+            if expected > calculated:
+                A = calculated
+                B = expected
+            else:
+                A = expected
+                B = calculated
+            if A == 0:
+                A = .000000000001
+            fitness += -abs((A - B) / A)
     return fitness

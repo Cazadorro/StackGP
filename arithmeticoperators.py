@@ -16,8 +16,17 @@ def protected_div(a, b):
         return 1
     return truediv(a, b)
 
+def ADD(a, b):
+    return add(a, b)
 
-addOp = FunctionalSetOperator(add, "ADD")
-subOp = FunctionalSetOperator(sub, "SUB")
+def SUB(a, b):
+    return sub(a, b)
+
+def MUL(a, b):
+    return mul(a, b)
+
+
+addOp = FunctionalSetOperator(ADD, "ADD")
+subOp = FunctionalSetOperator(SUB, "SUB")
 divOp = FunctionalSetOperator(protected_div, "DIV")
-mulOp = FunctionalSetOperator(mul, "MUL")
+mulOp = FunctionalSetOperator(MUL, "MUL")

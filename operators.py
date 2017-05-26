@@ -20,7 +20,7 @@ class GeneticOperator:
     argument_source = DataSource.NoSource
     result_destination = DataSource.ResultStack
 
-    def __init__(self, name: Optional(str) = "NotNamed"):
+    def __init__(self, name: Optional[str] = "NotNamed"):
         self._name = name
 
     @staticmethod
@@ -43,16 +43,16 @@ class GeneticOperator:
 
 
 class FunctionalSetOperator(GeneticOperator):
-    argument_source = DataSource.OperatorStack
+    argument_source = DataSource.ResultStack
 
-    def __init__(self, func, name: Optional(str) = "NotNamed"):
+    def __init__(self, func, name: Optional[str] = "NotNamed"):
         super().__init__(name)
         self.num_args = get_number_args(func)
         self.func = func
 
     def __call__(self, vm_structures):
         result_stack = self.get_arguments(vm_structures)
-        if self.num_args >= len(result_stack):
+        if self.num_args <= len(result_stack):
             arguments = result_stack.pop(self.num_args)
             return self.func(*arguments)
         return None
@@ -60,7 +60,7 @@ class FunctionalSetOperator(GeneticOperator):
 
 class TerminalSetOperator(GeneticOperator):
     def __init__(self, data: EncapsulatedData,
-                 name: Optional(str) = "NotNamed"):
+                 name: Optional[str] = "NotNamed"):
         super().__init__(name)
         self.data = data
 
@@ -73,7 +73,7 @@ class MultiSourceOperator(GeneticOperator):
     result_destination = DataSource.OperatorStack
 
     def __init__(self, exec_func, arg_source_list,
-                 name: Optional(str) = "NotNamed"):
+                 name: Optional[str] = "NotNamed"):
         super().__init__(name)
         self.func = exec_func
         self.arg_source_list = arg_source_list

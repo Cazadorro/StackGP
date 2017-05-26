@@ -42,7 +42,7 @@ def delete(muation_param: MutationParameters):
 def reorder(mutation_param: MutationParameters):
     genes = mutation_param.genes
     gene = mutation_param.gene
-    x = random.randint(len(genes))
+    x = random.randrange(len(genes))
     gene, genes[x] = genes[x], gene
     return [gene]
 
@@ -73,8 +73,8 @@ class Mutator:
             if random.random() < self._chance:
                 new_genes = next(self._mutgenerator)(mutation_params)
             else:
-                new_genes = gene
-            prev_gene = new_genes[-1]
+                new_genes = [gene]
+            prev_gene = new_genes[-1] if new_genes != [] else None
             new_genotype.extend(new_genes)
         return StackGenotype(new_genotype)
 

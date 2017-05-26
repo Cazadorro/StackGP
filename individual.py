@@ -44,14 +44,6 @@ class Fitness:
         return "fitness : {}".format(self._value)
 
 
-class ParsimonyPressure:
-    def __init__(self, pressure):
-        self.pressure = pressure
-
-    def __call__(self, individual: Individual):
-        return -1 * (self.pressure * len(individual._genotype))
-
-
 class Individual:
     def __init__(self, genotype, fitnessclass, fitnessmodfier):
         self._genotype = genotype
@@ -62,6 +54,7 @@ class Individual:
         # TODO should gene dictionary be a part of evaluator?
         fitness = fitness_evaluator(self._genotype)
         self._fitness.update(fitness + self._modifier(self))
+        return self
 
     @property
     def genotype(self):
@@ -101,9 +94,17 @@ class IndividualFactory:
                                       self._fitnessmodfier)
 
 
+class ParsimonyPressure:
+    def __init__(self, pressure):
+        self.pressure = pressure
+
+    def __call__(self, individual: Individual):
+        return -1 * (self.pressure * len(individual._genotype))
+
+
 def print_individual(individual: Individual, opmap: List[GeneticOperator]):
     print(individual.fitness)
     print("-----STACK-----")
-    for key in reversed(individual.genotype.keys):
+    for key in individual.genotype.keys():
         print(opmap[key])
     print("------END------")
