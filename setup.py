@@ -2,7 +2,7 @@
 
 from distutils.core import setup
 
-setup(name='Distutils',
+setup(name='StackGeneticProgramming',
       version='1.0',
       description='Stack Based Genetic Programming utilities',
       author='Cazadorro',
