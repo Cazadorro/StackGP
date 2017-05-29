@@ -1,9 +1,10 @@
 # !/bin/bash
 
-from structures import Stack, DataSource
-from genetics import StackPhenotype
 from typing import List, Callable, Any
-from structures import EncapsulatedData
+
+from .structures import Stack, DataSource
+
+from .genetics import StackPhenotype
 
 
 def evaluate_operator_stack(operator_stack):

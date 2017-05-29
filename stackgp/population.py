@@ -1,4 +1,5 @@
 # !/bin/bash
+import random
 
 
 class PopulationSize:
@@ -36,10 +37,13 @@ class PopulationSize:
 
 
 class GeneFunctions:
-    def __init__(self, initializer, mutator, recombinator):
+    def __init__(self, initializer, mutator, recombinator, mutate_chance,
+                 recombine_chance):
         self._initializer = initializer
         self._mutator = mutator
         self._recombinator = recombinator
+        self._recombine_chance = recombine_chance
+        self._mutate_chance = mutate_chance
 
     def initialize(self, size, wrapper):
         return self._initializer(size, wrapper)
@@ -49,6 +53,20 @@ class GeneFunctions:
 
     def recombine(self, genotypes, wrapper):
         return self._recombinator(genotypes, wrapper)
+
+    @property
+    def recombine_chance(self):
+        return self._recombine_chance
+
+    @property
+    def mutate_chance(self):
+        return self._mutate_chance
+
+    def can_mutate(self):
+        return random.random() < self._mutate_chance
+
+    def can_recombine(self):
+        return random.random() < self._recombine_chance
 
 
 class SelectionFunctions:
@@ -142,14 +160,26 @@ class Population:
 
     # TODO enough list size?
     def recombine(self):
-        self._recombined = [
-            self._mutator.recombine(pair, self._memberprops.wrapper) for pair in
-            self._parent_pairs]
+        templist = []
+        for pair in self._parent_pairs:
+            if self._mutator.can_recombine():
+                templist.append(
+                    self._mutator.recombine(pair, self._memberprops.wrapper))
+            else:
+                templist.append(self._mutator.initialize(
+                    self._popsize.initsize,
+                    self._memberprops.wrapper))
+        self._recombined = templist
 
     def mutate(self):
-        self._unevaluated = [
-            self._mutator.mutate(individual, self._memberprops.wrapper) for
-            individual in self._recombined]
+        templist = []
+        for individual in self._recombined:
+            if self._mutator.can_mutate():
+                templist.append(self._mutator.mutate(individual,
+                                                     self._memberprops.wrapper))
+            else:
+                templist.append(individual)
+        self._unevaluated.extend(templist)
 
     def select_survivors(self):
         self._evaluated = self._selector.select_survivors(

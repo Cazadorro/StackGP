@@ -1,7 +1,7 @@
 #!/bin/bash
 
-from aliassampling import weighted_choice_generator
-from resevoirsampling import weighted_reservoir_sample
+from .aliassampling import weighted_choice_generator
+from .resevoirsampling import weighted_reservoir_sample
 
 
 def n_choice_sampler(sample_list: list, weight_list: list, n: int, *,

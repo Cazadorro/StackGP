@@ -1,22 +1,23 @@
 #!/bin/bash
 
-import population as pop
-import initialization as init
-import mutation as mut
-import recombination as recom
-import parentpairing as pairing
-import selection as sel
-from generators import uniform_elem_generator, uniform_gene_generator
 from enum import IntEnum, unique
-from operators import TerminalSetOperator
-from structures import EncapsulatedData
-from arithmeticoperators import addOp, subOp, mulOp, divOp
-from evaluation import BasicFitnessEvaluator, TerminalDataSet, \
+
+from stackgp import initialization as init
+from stackgp import mutation as mut
+from stackgp import population as pop
+from stackgp import recombination as recom
+from stackgp import selection as sel
+from stackgp.arithmeticoperators import addOp, subOp, mulOp, divOp
+from stackgp.evaluation import TerminalDataSet, \
     absolute_error_fitness_function, CountCorrectFitnessEvaluator
-from structures import Stack
-from genetics import StackGenotype
-from individual import Individual, print_individual, IndividualFactory, \
+from stackgp.generators import uniform_elem_generator, uniform_gene_generator
+from stackgp.genetics import StackGenotype
+from stackgp.individual import Individual, print_individual, IndividualFactory, \
     ParsimonyPressure, Fitness
+from stackgp.operators import TerminalSetOperator
+from stackgp.structures import EncapsulatedData
+
+from stackgp import parentpairing as pairing
 
 
 @unique
@@ -28,12 +29,16 @@ class OpEnum(IntEnum):
     x = 4
 
 
+def tempfunc(x):
+    return x ** 2 + 0.5
+
+
 def pow2datasetgen(xlist: list):
-    return [x ** 2 for x in xlist]
+    return [tempfunc(x) for x in xlist]
 
 
 def main():
-    popsize = pop.PopulationSize(10, 5, 2, 16)
+    popsize = pop.PopulationSize(1000, 500, 2, 32)
     x = EncapsulatedData(None)
     termx = TerminalSetOperator(x, "X")
     op_list = [addOp, subOp, mulOp, divOp, termx]
@@ -41,13 +46,15 @@ def main():
 
     op_enums = [OpEnum.add, OpEnum.sub, OpEnum.mul, OpEnum.div, OpEnum.x]
     gene_generator = uniform_gene_generator(op_enums)
-    mutator_list = [mut.duplicate, mut.replace, mut.insert, mut.delete,
-                    mut.reorder, mut.merge]
+    # mutator_list = [mut.duplicate, mut.replace, mut.insert, mut.delete,
+    #                mut.reorder, mut.merge]
+    mutator_list = [mut.replace, mut.insert, mut.delete,
+                    mut.reorder]
     mutator_generator = uniform_elem_generator(mutator_list)
     initializer = init.GeneratorInitializer(gene_generator)
-    mutator = mut.Mutator(mutator_generator, gene_generator, 0.1)
+    mutator = mut.Mutator(mutator_generator, gene_generator)
     recombinator = recom.UniformCrossover()
-    genefunc = pop.GeneFunctions(initializer, mutator, recombinator)
+    genefunc = pop.GeneFunctions(initializer, mutator, recombinator, 0.4, 0.5)
     parent_selector = sel.StochasticSelector(True, True)
     pairing_selector = pairing.stochastic_pairing
     survival_selector = sel.ElitistSelector(True, True)
@@ -61,7 +68,7 @@ def main():
         absolute_error_fitness_function,
         terminal_dataset, 2)
 
-    modifier = ParsimonyPressure(4)
+    modifier = ParsimonyPressure(1)
     individual_wrapper = IndividualFactory(Individual, Fitness,
                                            modifier)
     popmemparam = pop.MemberProperties(StackGenotype, individual_wrapper,
@@ -70,7 +77,7 @@ def main():
 
     population.initialize()
     population.evaluate(population.get_mu())
-    while population.generations < 10:
+    while population.generations < 100:
         print("new round")
         population.select_parents()
         print("evaluated parents")

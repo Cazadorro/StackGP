@@ -1,8 +1,9 @@
 #!/bin/bash
 
 import inspect
-from structures import DataSource, EncapsulatedData
 from typing import Optional
+
+from .structures import DataSource, EncapsulatedData
 
 
 def get_arg_limit(arg_spec):

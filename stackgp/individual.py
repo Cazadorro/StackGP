@@ -1,8 +1,8 @@
 #!/bin/bash
 
-from genetics import StackPhenotype
 from typing import List
-from operators import GeneticOperator
+
+from .operators import GeneticOperator
 
 
 class Fitness:

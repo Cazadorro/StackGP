@@ -1,9 +1,8 @@
 #!/bin/bash
 
-from genetics import StackGenotype
-from itertools import islice
-import random
 import copy
+import random
+from itertools import islice
 
 
 class Initializer:

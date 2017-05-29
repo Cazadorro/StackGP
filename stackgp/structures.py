@@ -2,22 +2,25 @@
 
 
 from enum import Enum, auto, unique
+from typing import TypeVar, Generic, Any
+
+T = TypeVar('T')
 
 
-class EncapsulatedData:
+class EncapsulatedData(Generic[T]):
     """
     wrapper for a reference to any primitive or any variable
     """
 
-    def __init__(self, data):
+    def __init__(self, data: T):
         self._data = data
 
     @property
-    def value(self):
+    def value(self) -> T:
         return self._data
 
     @value.setter
-    def value(self, data):
+    def value(self, data : T):
         self._data = data
 
 
@@ -29,7 +32,7 @@ class DataSource(Enum):
     ExecutionStack = auto()
 
 
-class Stack:
+class Stack(Generic[T]):
     def __init__(self, stack_list=()):
         self._stack = list(stack_list)
 
@@ -51,6 +54,3 @@ class Stack:
 
     def pick(self, n):
         return self._stack[-(n + 1)] if n < len(self) else None
-
-
-

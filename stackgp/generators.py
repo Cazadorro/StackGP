@@ -1,10 +1,12 @@
 #!/bin/bash
 
-import random
 import math
+import random
+
 import numpy as np
-from aliassampling import AliasSampler
-from genetics import StackMultiGene
+
+from .genetics import StackMultiGene
+from .sampling.aliassampling import AliasSampler
 
 
 def binary_search(search_list, value, min_index=0, max_index=None):
@@ -70,6 +72,7 @@ def uniform_gene_generator(elem: list):
 def uniform_mutation_generator(mutators: list):
     while True:
         yield random.choice(mutators)
+
 
 def weighted_mutation_generator(mutators: list, probabilities: list):
     sampler = AliasSampler(mutators, probabilities)

@@ -1,9 +1,11 @@
 #!/bin/bash
 
-from genetics import StackGenotype
 import random
 from copy import deepcopy
-from individual import Individual
+
+from .genetics import StackGenotype
+
+from .individual import Individual
 
 
 class MutationParameters:
@@ -58,10 +60,9 @@ def merge(mutation_param: MutationParameters):
 
 
 class Mutator:
-    def __init__(self, mutation_generator, genechoice_generator, mutation_chance):
+    def __init__(self, mutation_generator, genechoice_generator):
         self._mutgenerator = mutation_generator
         self._genegenerator = genechoice_generator
-        self._chance = mutation_chance
 
     def _mutate(self, individual: Individual):
         prev_gene = None
@@ -70,10 +71,8 @@ class Mutator:
         mutation_params = MutationParameters(self._genegenerator, genes)
         for gene in genes:
             mutation_params.set_genes(gene, prev_gene)
-            if random.random() < self._chance:
-                new_genes = next(self._mutgenerator)(mutation_params)
-            else:
-                new_genes = [gene]
+            new_genes = next(self._mutgenerator)(mutation_params)
+
             prev_gene = new_genes[-1] if new_genes != [] else None
             new_genotype.extend(new_genes)
         return StackGenotype(new_genotype)

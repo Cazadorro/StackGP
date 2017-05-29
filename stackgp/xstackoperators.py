@@ -1,6 +1,7 @@
 #!/bin/bash
-from operators import MultiSourceOperator, FunctionalSetOperator
-from structures import DataSource
+from .structures import DataSource
+
+from .operators import MultiSourceOperator
 
 
 def xpush_func(result_stack, operator_stack):

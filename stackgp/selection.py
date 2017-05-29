@@ -1,8 +1,7 @@
 #!/bin/bash
 import random
-from functools import wraps
-from operator import attrgetter, itemgetter
-from combinedsampling import n_choice_sampler, replacement_sampler, \
+
+from .sampling.combinedsampling import replacement_sampler, \
     no_replacement_sampler
 
 

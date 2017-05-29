@@ -1,7 +1,8 @@
 #!/bin/bash
 
-from operators import FunctionalSetOperator
 from operator import add, sub, truediv, mul
+
+from .operators import FunctionalSetOperator
 
 
 def protected_div(a, b):

@@ -1,8 +1,9 @@
 #!/bin/bash
 import random
 from copy import deepcopy
-from individual import Individual
 from typing import Tuple
+
+from .individual import Individual
 
 
 class Crossover:
